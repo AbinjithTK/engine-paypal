@@ -1,0 +1,78 @@
+# Render Blueprint for Engine. Deploy with New > Blueprint in the Render dashboard.
+# Secrets marked sync: false are asked for once, in the dashboard, and never stored here.
+
+services:
+  - type: web
+    name: engine
+    runtime: docker
+    dockerContext: ./web
+    dockerfilePath: ./web/Dockerfile
+    # A persistent disk needs a paid instance. The free tier also sleeps after
+    # 15 minutes idle, which a judge opening the link would hit.
+    plan: starter
+    region: oregon
+    healthCheckPath: /api/mcp
+    buildFilter:
+      paths:
+        - web/**
+    disk:
+      name: engine-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: /var/data
+      - key: PAYPAL_ENVIRONMENT
+        value: SANDBOX
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_CLIENT_EMAIL
+        sync: false
+      - key: PAYPAL_FREELANCER_EMAIL
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: NEBIUS_API_KEY
+        sync: false
+      # Optional. Elastic for Brain search once the data grows; local search otherwise.
+      - key: ELASTIC_URL
+        sync: false
+      - key: ELASTIC_API_KEY
+        sync: false
+      # Optional. Read-only token, only needed to connect private GitHub repos.
+      - key: GITHUB_TOKEN
+        sync: false
+      # Token a freelancer's AI agent uses for /api/mcp. Shown on /app/connect
+      # because this is a public sandbox demo; remove ENGINE_SHOW_DOER_TOKEN for real use.
+      - key: ENGINE_DOER_TOKEN
+        generateValue: true
+      - key: ENGINE_SHOW_DOER_TOKEN
+        value: "1"
+      # Shared with the cron job below.
+      - key: CRON_SECRET
+        generateValue: true
+      # Optional. Set it to lock funding, sign-off and Brain edits behind /app/unlock.
+      - key: ENGINE_OWNER_KEY
+        sync: false
+
+  # Daily builders: the Bookkeeper reads PayPal, the Librarian checks the Brain,
+  # the Scout suggests the next builder. Also releases any job whose window ended.
+  - type: cron
+    name: engine-daily
+    runtime: image
+    image:
+      url: docker.io/curlimages/curl:8.11.1
+    schedule: "30 3 * * *" # 09:00 IST
+    dockerCommand: >-
+      sh -c 'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$ENGINE_URL/api/engine/cron?daily=1"'
+    envVars:
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: engine
+          envVarKey: CRON_SECRET
+      # The web service's public address, e.g. https://engine-xxxx.onrender.com
+      - key: ENGINE_URL
+        sync: false

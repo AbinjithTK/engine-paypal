@@ -1,0 +1,34 @@
+# Secrets — never commit. This repo gets shared with hackathon judges.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials.json
+service-account*.json
+gha-creds-*.json
+
+# Local MCP config can contain API keys
+.kiro/settings/mcp.json
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Cloud / tooling
+.gcloudignore
+.vercel
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
