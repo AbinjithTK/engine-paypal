@@ -19,6 +19,9 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 # Cloud Run injects PORT; Next's server.js reads it.
 ENV PORT=8080
+# Next's standalone server binds to $HOSTNAME, which Docker sets to the container
+# name. Listen on every interface so Render's proxy can reach it.
+ENV HOSTNAME=0.0.0.0
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
