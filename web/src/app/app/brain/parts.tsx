@@ -194,7 +194,7 @@ export function ToolsTab({ b, reload }: { b: Brain; reload: () => Promise<void> 
           <div className="divide">
             {b.connectors.map((c) => (
               <div key={c.id} className="fact">
-                <span className="pill pn" style={{ fontSize: 11 }}>
+                <span className="pill pn" style={{ fontSize: 12 }}>
                   {c.kind === "mcp" ? "MCP" : c.kind === "github" ? "GitHub" : "Tool"}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>

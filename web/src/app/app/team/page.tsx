@@ -53,7 +53,7 @@ export default function Teams() {
                     const invited = (r.invites ?? []).filter((i) => i.status === "invited").length;
                     return (
                       <div key={r.id} className="between" style={{ fontSize: 13 }}>
-                        <span className="pill pb" style={{ fontSize: 11 }}>
+                        <span className="pill pb" style={{ fontSize: 12 }}>
                           {r.role ?? "Expert"}
                         </span>
                         <span className="faint">{r.doer ? r.doer.name : invited ? `${invited} invited` : name("Open")}</span>

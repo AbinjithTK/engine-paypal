@@ -1054,3 +1054,26 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* Touch screens: segmented controls get finger-sized targets. */
+@media (pointer: coarse) {
+  .mw .seg button {
+    padding: 10px 14px;
+  }
+}
+/* Phones: the switch spans the width in equal parts, so no option wraps alone. */
+@media (max-width: 760px) {
+  .mw .seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    width: 100%;
+    border-radius: 14px;
+  }
+  .mw .seg button {
+    padding: 10px 6px;
+    border-radius: 11px;
+    line-height: 1.25;
+  }
+}

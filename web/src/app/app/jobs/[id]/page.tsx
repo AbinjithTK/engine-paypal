@@ -118,7 +118,7 @@ function Milestones({ d }: { d: Detail }) {
             </div>
             <div className="d row" style={{ justifyContent: "space-between" }}>
               <span>{usd(m.priceCents)}</span>
-              <span className={`pill ${m.locked ? "pn" : STATE_LABEL[m.state].cls}`} style={{ fontSize: 11 }}>
+              <span className={`pill ${m.locked ? "pn" : STATE_LABEL[m.state].cls}`} style={{ fontSize: 12 }}>
                 {m.locked ? "Opens later" : STATE_LABEL[m.state].text}
               </span>
             </div>
@@ -602,7 +602,7 @@ function JobPage() {
             <div className="divide">
               {d.shared.map((f) => (
                 <div key={f.id} className="fact" style={{ padding: "7px 0" }}>
-                  <span className="pill pn" style={{ fontSize: 11 }}>
+                  <span className="pill pn" style={{ fontSize: 12 }}>
                     {f.section}
                   </span>
                   <span style={{ fontSize: 13.5 }}>{f.text}</span>

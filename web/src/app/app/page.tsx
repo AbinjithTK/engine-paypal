@@ -135,7 +135,7 @@ export default function Home() {
                       <span className={`dot ${b.paused ? "idle" : recent ? "busy" : "ok"}`} />
                       {b.name}
                     </span>
-                    <span className="pill pn" style={{ fontSize: 11 }}>
+                    <span className="pill pn" style={{ fontSize: 12 }}>
                       {b.mode === "auto" ? "On its own" : b.mode === "ask" ? "Asks you first" : "Only suggests"}
                     </span>
                   </div>

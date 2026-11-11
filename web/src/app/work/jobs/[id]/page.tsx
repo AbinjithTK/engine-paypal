@@ -289,7 +289,7 @@ export default function ExpertJob() {
                 {v.team.map((m) => (
                   <div key={m.id} className="between" style={{ padding: "8px 0", fontSize: 14 }}>
                     <span>
-                      <span className="pill pb" style={{ fontSize: 11 }}>
+                      <span className="pill pb" style={{ fontSize: 12 }}>
                         {m.role ?? "Expert"}
                       </span>{" "}
                       {m.title}
@@ -333,7 +333,7 @@ export default function ExpertJob() {
             <div className="divide" style={{ marginTop: 6 }}>
               {v.facts.map((f) => (
                 <div key={f.id} className="fact" style={{ padding: "7px 0" }}>
-                  <span className="pill pn" style={{ fontSize: 11 }}>
+                  <span className="pill pn" style={{ fontSize: 12 }}>
                     {f.section}
                   </span>
                   <span style={{ fontSize: 13.5 }}>{f.text}</span>

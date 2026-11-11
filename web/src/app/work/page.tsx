@@ -193,7 +193,7 @@ export default function WorkHome() {
             <p className="h3">{h.me.headline}</p>
             <div className="row" style={{ flexWrap: "wrap", gap: 4 }}>
               {h.me.skills.map((s) => (
-                <span key={s} className="pill pn" style={{ fontSize: 11 }}>
+                <span key={s} className="pill pn" style={{ fontSize: 12 }}>
                   {s}
                 </span>
               ))}

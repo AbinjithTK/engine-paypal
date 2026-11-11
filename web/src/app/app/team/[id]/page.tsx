@@ -158,7 +158,7 @@ export default function TeamBoard() {
                 >
                   <div className="between">
                     <span className="pill pb">{r.role}</span>
-                    <span className={`pill ${r.locked ? "pn" : STATE_LABEL[r.state].cls}`} style={{ fontSize: 11 }}>
+                    <span className={`pill ${r.locked ? "pn" : STATE_LABEL[r.state].cls}`} style={{ fontSize: 12 }}>
                       {r.locked ? "Opens later" : STATE_LABEL[r.state].text}
                     </span>
                   </div>
@@ -310,7 +310,7 @@ export default function TeamBoard() {
                 </div>
                 <div className="row" style={{ flexWrap: "wrap", gap: 4, margin: "8px 0" }}>
                   {e.skills.slice(0, 4).map((s) => (
-                    <span key={s} className="pill pn" style={{ fontSize: 11 }}>
+                    <span key={s} className="pill pn" style={{ fontSize: 12 }}>
                       {s}
                     </span>
                   ))}
