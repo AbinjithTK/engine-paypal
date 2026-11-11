@@ -1,5 +1,11 @@
 # Render Blueprint for Engine. Deploy with New > Blueprint in the Render dashboard.
 # Secrets marked sync: false are asked for once, in the dashboard, and never stored here.
+#
+# Free plan for the hackathon demo. Two things to know:
+# - It sleeps after 15 minutes idle, so the first visit after a pause takes about a minute.
+# - There is no persistent disk, so data resets on each deploy or restart and the
+#   sandbox demo company comes back. For real use, switch to plan: starter and add
+#   a disk mounted at /var/data with DATA_DIR=/var/data.
 
 services:
   - type: web
@@ -7,21 +13,15 @@ services:
     runtime: docker
     dockerContext: ./web
     dockerfilePath: ./web/Dockerfile
-    # A persistent disk needs a paid instance. The free tier also sleeps after
-    # 15 minutes idle, which a judge opening the link would hit.
-    plan: starter
+    plan: free
     region: oregon
     healthCheckPath: /api/mcp
     buildFilter:
       paths:
         - web/**
-    disk:
-      name: engine-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: DATA_DIR
-        value: /var/data
+        value: /tmp/engine-data
       - key: PAYPAL_ENVIRONMENT
         value: SANDBOX
       - key: PAYPAL_CLIENT_ID
@@ -50,29 +50,9 @@ services:
         generateValue: true
       - key: ENGINE_SHOW_DOER_TOKEN
         value: "1"
-      # Shared with the cron job below.
+      # For the daily run, if you add a cron job that calls /api/engine/cron?daily=1.
       - key: CRON_SECRET
         generateValue: true
       # Optional. Set it to lock funding, sign-off and Brain edits behind /app/unlock.
       - key: ENGINE_OWNER_KEY
-        sync: false
-
-  # Daily builders: the Bookkeeper reads PayPal, the Librarian checks the Brain,
-  # the Scout suggests the next builder. Also releases any job whose window ended.
-  - type: cron
-    name: engine-daily
-    runtime: image
-    image:
-      url: docker.io/curlimages/curl:8.11.1
-    schedule: "30 3 * * *" # 09:00 IST
-    dockerCommand: >-
-      sh -c 'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$ENGINE_URL/api/engine/cron?daily=1"'
-    envVars:
-      - key: CRON_SECRET
-        fromService:
-          type: web
-          name: engine
-          envVarKey: CRON_SECRET
-      # The web service's public address, e.g. https://engine-xxxx.onrender.com
-      - key: ENGINE_URL
         sync: false
