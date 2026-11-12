@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { chunksById, factsById } from "@/lib/engine/brain";
 import { read } from "@/lib/engine/db";
-import { body, denied, fail, isOwner, originOf } from "@/lib/engine/http";
+import { body, denied, fail, isOwner, originOf, scoped } from "@/lib/engine/http";
 import {
   appeal,
   cancelJob,
@@ -21,7 +21,7 @@ import {
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export async function GET(_req: Request, ctx: RouteContext<"/api/engine/jobs/[id]">) {
+async function GET_(_req: Request, ctx: RouteContext<"/api/engine/jobs/[id]">) {
   const { id } = await ctx.params;
   const db = read();
   const job = db.jobs.find((j) => j.id === id);
@@ -57,7 +57,7 @@ type Action =
   | { action: "rematch" }
   | { action: "cancel" };
 
-export async function POST(req: Request, ctx: RouteContext<"/api/engine/jobs/[id]">) {
+async function POST_(req: Request, ctx: RouteContext<"/api/engine/jobs/[id]">) {
   const { id } = await ctx.params;
   const b = await body<Action>(req);
   // Appeals are open to both sides; everything else is the owner's.
@@ -97,3 +97,6 @@ export async function POST(req: Request, ctx: RouteContext<"/api/engine/jobs/[id
     return fail(e);
   }
 }
+
+export const GET = scoped(GET_);
+export const POST = scoped(POST_);

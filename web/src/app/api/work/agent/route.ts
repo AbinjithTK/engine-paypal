@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { read } from "@/lib/engine/db";
-import { expertCookie } from "@/lib/engine/http";
+import { expertCookie, scoped } from "@/lib/engine/http";
 import { handedTo, resourcesFor, tokenForExpert } from "@/lib/engine/mcp";
 import { expertById } from "@/lib/engine/work";
 
 export const dynamic = "force-dynamic";
 
 /** The signed-in expert's own MCP key, and what their agent will see right now. */
-export async function GET(req: Request) {
+async function GET_(req: Request) {
   const db = read();
   const me = expertById(db, expertCookie(req));
   if (!me) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   const proto = req.headers.get("x-forwarded-proto") ?? (/^(127\.|localhost)/.test(host) ? "http" : "https");
   const url = `${process.env.PUBLIC_URL?.replace(/\/$/, "") || `${proto}://${host}`}/api/mcp`;
   const session = { id: me.id, name: me.name, email: me.email };
+  // The key belongs to the company the expert is looking at.
 
   return NextResponse.json({
     url,
@@ -32,3 +33,5 @@ export async function GET(req: Request) {
     calls: db.access.filter((a) => a.actor === me.name).slice(0, 8),
   });
 }
+
+export const GET = scoped(GET_);

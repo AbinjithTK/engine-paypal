@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { read } from "@/lib/engine/db";
+import { ownerPage } from "@/lib/engine/http";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,11 @@ function initials(name: string) {
 }
 
 /** Every expert the company can hire, with what they've done for it so far. */
-export default function Experts() {
+export default async function Experts() {
+  return ownerPage(() => render());
+}
+
+function render() {
   const db = read();
   const rows = db.experts.map((e) => {
     const done = db.jobs.filter((j) => j.doer?.id === e.id && j.state === "paid");
@@ -39,7 +44,9 @@ export default function Experts() {
                 {initials(e.name)}
               </span>
               <div style={{ minWidth: 0 }}>
-                <p className="h3">{e.name}</p>
+                <p className="h3">
+                  {e.name} {e.demo && <span className="pill pn">Demo</span>}
+                </p>
                 <p className="faint">{e.location}</p>
               </div>
               <span className={`dot ${e.available ? "ok" : "idle"}`} style={{ marginLeft: "auto", marginTop: 6 }} title={e.available ? "Available" : "Busy"} />

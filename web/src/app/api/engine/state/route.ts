@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { scoped } from "@/lib/engine/http";
+
 import { liveFacts } from "@/lib/engine/brain";
-import { read } from "@/lib/engine/db";
+import { isDemoWs, read } from "@/lib/engine/db";
 import { sweep } from "@/lib/engine/jobs";
 import { balance, PAYPAL_SANDBOX, paypalConfigured } from "@/lib/engine/paypal";
 import { geminiConfigured, nebiusConfigured } from "@/lib/engine/gemini";
@@ -11,7 +13,7 @@ export const dynamic = "force-dynamic";
 let balanceCache: { at: number; value: Awaited<ReturnType<typeof balance>> } | null = null;
 
 /** Everything the village needs in one read. Also releases jobs whose window ended. */
-export async function GET() {
+async function GET_() {
   await sweep();
   if (!balanceCache || Date.now() - balanceCache.at > 30_000) {
     balanceCache = { at: Date.now(), value: paypalConfigured() ? await balance() : null };
@@ -24,6 +26,8 @@ export async function GET() {
   const paidOut = db.jobs.filter((j) => j.state === "paid").reduce((n, j) => n + j.priceCents, 0);
   return NextResponse.json({
     serverNow: Date.now(),
+    // The sample company that anyone can open, as opposed to an owner's own.
+    demo: isDemoWs(),
     company: db.company,
     sandbox: PAYPAL_SANDBOX,
     configured: { paypal: paypalConfigured(), gemini: geminiConfigured(), nebius: nebiusConfigured() },
@@ -44,3 +48,5 @@ export async function GET() {
     access: db.access.slice(0, 20),
   });
 }
+
+export const GET = scoped(GET_);

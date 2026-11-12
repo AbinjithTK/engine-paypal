@@ -7,7 +7,9 @@
 
 import { NextResponse } from "next/server";
 
+import { scope } from "@/lib/engine/db";
 import {
+  wsForToken,
   callTool,
   instructionsFor,
   promptFor,
@@ -59,6 +61,11 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  // Each key belongs to one company; run the whole call inside it.
+  return scope.run({ ws: wsForToken(tokenFrom(req)) }, () => handle(req));
+}
+
+async function handle(req: Request) {
   let body: RpcRequest;
   try {
     body = (await req.json()) as RpcRequest;

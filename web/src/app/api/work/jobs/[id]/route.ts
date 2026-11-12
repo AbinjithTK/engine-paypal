@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { read } from "@/lib/engine/db";
-import { body, expertCookie, fail } from "@/lib/engine/http";
+import { body, expertCookie, fail, scoped } from "@/lib/engine/http";
 import * as jobs from "@/lib/engine/jobs";
 import { expertById, expertJob } from "@/lib/engine/work";
 
@@ -12,7 +12,7 @@ function who(req: Request) {
   return expertById(read(), expertCookie(req));
 }
 
-export async function GET(req: Request, ctx: RouteContext<"/api/work/jobs/[id]">) {
+async function GET_(req: Request, ctx: RouteContext<"/api/work/jobs/[id]">) {
   const { id } = await ctx.params;
   const me = who(req);
   if (!me) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
@@ -29,7 +29,7 @@ type Action =
   | { action: "update"; text: string }
   | { action: "submit"; content: string; artefact?: string; notes?: string };
 
-export async function POST(req: Request, ctx: RouteContext<"/api/work/jobs/[id]">) {
+async function POST_(req: Request, ctx: RouteContext<"/api/work/jobs/[id]">) {
   const { id } = await ctx.params;
   const me = who(req);
   if (!me) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
@@ -61,3 +61,6 @@ export async function POST(req: Request, ctx: RouteContext<"/api/work/jobs/[id]"
     return fail(e);
   }
 }
+
+export const GET = scoped(GET_);
+export const POST = scoped(POST_);

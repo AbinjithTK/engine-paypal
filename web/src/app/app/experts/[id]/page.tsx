@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { read } from "@/lib/engine/db";
+import { ownerPage } from "@/lib/engine/http";
 
 import { InviteBox } from "./invite";
 
@@ -11,6 +12,10 @@ const usd = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFracti
 
 export default async function ExpertProfile({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  return ownerPage(() => render(id));
+}
+
+function render(id: string) {
   const db = read();
   const e = db.experts.find((x) => x.id === id);
   if (!e) notFound();
@@ -31,7 +36,9 @@ export default async function ExpertProfile({ params }: { params: Promise<{ id: 
       <p className="label">
         <Link href="/app/experts">Experts</Link> / {e.name}
       </p>
-      <h1 className="h1">{e.name}</h1>
+      <h1 className="h1">
+        {e.name} {e.demo && <span className="pill pn" style={{ verticalAlign: "middle" }}>Demo account</span>}
+      </h1>
       <p className="soft" style={{ fontSize: 18 }}>
         {e.headline}
       </p>

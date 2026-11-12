@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { denied, fail, isOwner } from "@/lib/engine/http";
+import { denied, fail, isOwner, scoped } from "@/lib/engine/http";
 import { extractText, ingest, IngestError, MAX_BYTES } from "@/lib/engine/ingest";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 /** Multipart upload: one or more files, plus private=1 to keep them out of every job. */
-export async function POST(req: Request) {
+async function POST_(req: Request) {
   if (!isOwner(req)) return denied();
   let form: FormData;
   try {
@@ -35,3 +35,5 @@ export async function POST(req: Request) {
   if (results.every((r) => !r.ok)) return fail(new IngestError(results.map((r) => `${r.name}: ${r.error}`).join(" ")));
   return NextResponse.json({ results });
 }
+
+export const POST = scoped(POST_);

@@ -7,6 +7,8 @@ import type { Builder, Company, Job, Notice } from "@/lib/engine/types";
 export type EngineState = {
   /** Server clock at the last poll; render code uses it instead of Date.now(). */
   serverNow: number;
+  /** The shared demo company, not the signed-in owner's own. */
+  demo: boolean;
   company: Company;
   sandbox: boolean;
   configured: { paypal: boolean; gemini: boolean; nebius: boolean };

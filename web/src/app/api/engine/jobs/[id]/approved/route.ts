@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { originOf } from "@/lib/engine/http";
+import { originOf, scoped } from "@/lib/engine/http";
 import { confirmFunding } from "@/lib/engine/jobs";
 
 export const dynamic = "force-dynamic";
 
 /** PayPal sends the client back here after they approve. Place the hold. */
-export async function GET(req: Request, ctx: RouteContext<"/api/engine/jobs/[id]/approved">) {
+async function GET_(req: Request, ctx: RouteContext<"/api/engine/jobs/[id]/approved">) {
   const { id } = await ctx.params;
   const url = new URL(req.url);
   const orderId = url.searchParams.get("token") ?? "";
@@ -19,3 +19,5 @@ export async function GET(req: Request, ctx: RouteContext<"/api/engine/jobs/[id]
     return NextResponse.redirect(`${back}?error=${encodeURIComponent(msg.slice(0, 200))}`);
   }
 }
+
+export const GET = scoped(GET_);

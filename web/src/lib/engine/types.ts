@@ -89,6 +89,8 @@ export type Expert = {
   /** How they work with AI, e.g. "Drafts with Claude, edits by hand". */
   aiTools: string;
   location: string;
+  /** A seeded demo account, not a real person. */
+  demo?: boolean;
 };
 
 export type Invite = {

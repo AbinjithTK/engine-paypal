@@ -86,11 +86,11 @@ export default function Landing() {
             off, and PayPal pays the expert straight away.
           </p>
           <div className="row" style={{ flexWrap: "wrap" }}>
-            <Link className="btn p" href="/app">
-              I&rsquo;m hiring: open the owner dashboard
+            <Link className="btn p" href="/login?new=1">
+              Create an account
             </Link>
             <Link className="btn" href="/login">
-              I&rsquo;m an expert: find my work
+              Try the demo
             </Link>
           </div>
         </section>

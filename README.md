@@ -74,7 +74,8 @@ Passages are always kept locally. Switching to Elastic copies them into the inde
 
 | Screen | What it does |
 |---|---|
-| `/login` | Sign in as the business owner or as one of the experts (sandbox demo sign-in) |
+| `/login` | Create an account (business owner or expert) and sign in, or open a labelled demo account |
+| `/welcome` | Onboarding: an owner's company and first Brain facts, or an expert's profile and PayPal payout email |
 | `/app` Home | The company at a glance, the AI builders at work, the cards that need you, and one suggestion at a time |
 | `/app/jobs` | Work, milestones, the money held and paid |
 | `/app/jobs/[id]` | Brief, AI checks with reasons, notes for the person signing off, sign-off, PayPal IDs, what the job can see, agent access log |
@@ -145,7 +146,7 @@ Next.js 16, React 19, TypeScript. PayPal REST APIs and `@paypal/agent-toolkit`. 
 
 - **Sandbox only.** Live payouts need PayPal's approval, and Engine's terms need a lawyer's review before real clients use it.
 - **One company per deployment.** Data is a single JSON file on disk. Postgres is the next step.
-- **Demo identities.** The expert dashboard signs in by picking a seeded profile, and each expert's MCP key is signed from `ENGINE_DOER_TOKEN`, with no expiry beyond rotating that secret. Real accounts, expert vetting and credential checks, such as bar registration, are not built.
+- **Accounts.** Owners and experts sign up with email and password (scrypt hashes, signed session cookies), and each owner gets a private company workspace. There is no email verification or password reset yet. On Render's free plan the data lives on temporary disk, so accounts reset when the service restarts; a paid plan with a disk keeps them. The seeded Northwind company and its experts are demo accounts, labelled Demo.
 - **Payouts to seeded experts.** Only experts with sandbox PayPal accounts (`PAYPAL_FREELANCER_EMAIL`, `PAYPAL_EXPERT_EMAILS`) receive payouts you can see. The others' payouts stay unclaimed in the sandbox.
 - **The AI review can be wrong,** which is why money waits for a person on anything that needs judgement, and why appeals exist.
 - Engine is a marketplace. It does not give legal, tax or financial advice.

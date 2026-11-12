@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { read } from "@/lib/engine/db";
-import { body, isOwner } from "@/lib/engine/http";
+import { body, isOwner, scoped } from "@/lib/engine/http";
 
 export const dynamic = "force-dynamic";
 
 /** What the sign-in page needs to know: who the owner is, and whether a key is asked for. */
-export async function GET(req: Request) {
+async function GET_(req: Request) {
   const db = read();
   return NextResponse.json({
     company: db.company.name,
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 }
 
 /** Sets the owner cookie when ENGINE_OWNER_KEY matches. Unset key means an open demo. */
-export async function POST(req: Request) {
+async function POST_(req: Request) {
   const b = await body<{ key?: string; action?: string }>(req);
   if (b.action === "signout") {
     const res = NextResponse.json({ ok: true });
@@ -39,3 +39,6 @@ export async function POST(req: Request) {
   });
   return res;
 }
+
+export const GET = scoped(GET_);
+export const POST = scoped(POST_);

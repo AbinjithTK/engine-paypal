@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { scoped } from "@/lib/engine/http";
+
 import { read } from "@/lib/engine/db";
 import { projectJobs } from "@/lib/engine/jobs";
 
 export const dynamic = "force-dynamic";
 
 /** The team board for a project (or a single job): one slot per role, matches, invites, who is on it. */
-export async function GET(_req: Request, ctx: RouteContext<"/api/engine/team/[id]">) {
+async function GET_(_req: Request, ctx: RouteContext<"/api/engine/team/[id]">) {
   const { id } = await ctx.params;
   const db = read();
   const first = db.jobs.find((j) => j.project?.id === id) ?? db.jobs.find((j) => j.id === id);
@@ -33,3 +35,5 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/engine/team/[id
     totalCents: roles.reduce((n, r) => n + r.priceCents, 0),
   });
 }
+
+export const GET = scoped(GET_);

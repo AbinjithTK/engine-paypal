@@ -76,6 +76,14 @@ export default function Home() {
 
   return (
     <>
+      {state.demo && (
+        <div className="card pad between" style={{ marginBottom: 24, flexWrap: "wrap" }}>
+          <span className="soft">You&rsquo;re in the demo company. Everything works, on PayPal sandbox test money.</span>
+          <Link className="btn p s" href="/login?new=1">
+            Create your own company
+          </Link>
+        </div>
+      )}
       <p className="label">{state.company.name}</p>
       <h1 className="h1">
         {total ? (

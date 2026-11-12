@@ -1340,3 +1340,92 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+
+
+/* ─── accounts and onboarding ─── */
+.mw .role-pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.mw .role {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.mw .role .login-ic {
+  margin-bottom: 8px;
+}
+.mw .role small {
+  color: var(--ink-soft);
+}
+.mw .role[aria-pressed="true"] {
+  border-color: var(--blue);
+  background: var(--blue-wash);
+}
+.mw .role:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+.mw .steps-bar {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+}
+.mw .steps-bar li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+.mw .steps-bar li i {
+  display: block;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--line);
+}
+.mw .steps-bar li.done i,
+.mw .steps-bar li[aria-current="step"] i {
+  background: var(--blue);
+}
+.mw .steps-bar li[aria-current="step"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (max-width: 560px) {
+  .mw .steps-bar li span {
+    display: none;
+  }
+}
+.mw-demo {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  background: var(--sand);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mw .mw-company {
+  width: auto;
+  max-width: 220px;
+  padding: 6px 12px;
+  font-size: 13.5px;
+  border-radius: 999px;
+  border-color: var(--line);
+}

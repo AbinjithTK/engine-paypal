@@ -4,8 +4,8 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 
 import { FIRST_QUESTION, interviewTurn } from "@/lib/engine/brain";
-import { nextId, now, read, reset, write } from "@/lib/engine/db";
-import { denied, fail, isOwner } from "@/lib/engine/http";
+import { isDemoWs, nextId, now, read, reset, write } from "@/lib/engine/db";
+import { denied, fail, isOwner, scoped } from "@/lib/engine/http";
 import { extractText, ingest } from "@/lib/engine/ingest";
 
 export const dynamic = "force-dynamic";
@@ -25,8 +25,10 @@ const INTERVIEW =
   "Northwind Coffee roasts specialty coffee in small batches in Portland. We sell bags online and a 22 dollar monthly subscription, " +
   "mostly to people who brew pour-over at home, and we're starting wholesale to cafes. Our voice is warm, plain and a bit nerdy about origins.";
 
-export async function POST(req: Request) {
+async function POST_(req: Request) {
   if (!isOwner(req)) return denied();
+  // Loading the sample replaces everything, so it only ever touches the demo company.
+  if (!isDemoWs()) return NextResponse.json({ error: "The sample company loads only into the demo." }, { status: 403 });
   if (process.env.NODE_ENV === "production" && !process.env.ENGINE_OWNER_KEY && read().jobs.length > 0) {
     return NextResponse.json({ error: "This deployment already has work. Set ENGINE_OWNER_KEY to reload the sample." }, { status: 403 });
   }
@@ -74,3 +76,5 @@ export async function POST(req: Request) {
     return fail(e);
   }
 }
+
+export const POST = scoped(POST_);

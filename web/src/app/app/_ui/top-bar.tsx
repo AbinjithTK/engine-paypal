@@ -26,7 +26,16 @@ export function TopBar() {
         <i aria-hidden="true" />
         Engine
       </Link>
-      {state?.sandbox && <span className="mw-sandbox" title="A demo company on PayPal's test system. No real money moves.">PayPal sandbox · test money</span>}
+      {state?.demo && (
+        <span className="mw-demo" title="A shared sample company. Create an account to set up your own.">
+          Demo company
+        </span>
+      )}
+      {state?.sandbox && (
+        <span className="mw-sandbox mw-hide-sm" title="Payments run on PayPal's test system. No real money moves.">
+          PayPal sandbox
+        </span>
+      )}
       <nav className="mw-nav" aria-label="Main">
         {NAV.map((n) => {
           const on = n.href === "/app" ? path === "/app" : path.startsWith(n.href);
@@ -47,9 +56,17 @@ export function TopBar() {
         <span className="mw-r mw-hide-sm">
           <small>Builders</small> <b>{busy ? `${busy} busy` : state ? `${state.builders.length}` : "-"}</b>
         </span>
-        <Link className="mw-switch" href="/login" title="Sign in as an expert, or as the owner">
-          {state ? `${state.company.owner} · Switch` : "Switch"}
-        </Link>
+        <button
+          className="mw-switch"
+          style={{ background: "transparent", font: "inherit", cursor: "pointer" }}
+          title={state?.demo ? "Leave the demo and sign in or create an account" : "Sign out"}
+          onClick={async () => {
+            await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "signout" }) }).catch(() => {});
+            window.location.assign(new URL("/login", window.location.origin).toString());
+          }}
+        >
+          {state ? `${state.company.owner} · Sign out` : "Sign out"}
+        </button>
       </div>
     </header>
   );

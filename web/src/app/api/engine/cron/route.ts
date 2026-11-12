@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { runBuilder } from "@/lib/engine/builders";
-import { read } from "@/lib/engine/db";
+import { workspaces } from "@/lib/engine/accounts";
+import { DEMO_WS, read, scope } from "@/lib/engine/db";
 import { sweep } from "@/lib/engine/jobs";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +17,17 @@ export async function POST(req: Request) {
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
-  const released = await sweep();
   const daily = new URL(req.url).searchParams.get("daily") === "1";
+  const out: Record<string, unknown> = {};
+  // Every company: the demo one and each owner's.
+  for (const ws of [DEMO_WS, ...workspaces().map((w) => w.id)]) {
+    out[ws] = await scope.run({ ws }, () => runFor(daily));
+  }
+  return NextResponse.json(out);
+}
+
+async function runFor(daily: boolean) {
+  const released = await sweep();
   const runs: Record<string, string> = {};
   if (daily) {
     for (const id of read().builders.filter((x) => !["scoper", "reviewer"].includes(x.id)).map((x) => x.id)) {
@@ -31,5 +41,5 @@ export async function POST(req: Request) {
       }
     }
   }
-  return NextResponse.json({ released, runs });
+  return { released, runs };
 }

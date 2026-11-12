@@ -11,7 +11,16 @@ export function usd(c: number | null | undefined) {
   return `$${Math.trunc(c / 100).toLocaleString("en-US")}.${String(Math.abs(c) % 100).padStart(2, "0")}`;
 }
 
-export type Me = { me: Expert | null; experts: { id: string; name: string; headline: string; available: boolean }[]; company: string };
+export type Company = { ws: string; name: string; demo: boolean; invites: number; jobs: number };
+export type Me = {
+  me: Expert | null;
+  /** Signed in with a demo account rather than a real one. */
+  demoAccount: boolean;
+  experts: { id: string; name: string; headline: string; available: boolean }[];
+  company: string;
+  ws: string;
+  companies: Company[];
+};
 
 export function useMe() {
   const [me, setMe] = useState<Me | null>(null);
@@ -53,13 +62,19 @@ export function useToast() {
 export function WorkBar() {
   const path = usePathname();
   const { me } = useMe();
+  const companies = me?.companies ?? [];
+  const here = companies.find((c) => c.ws === me?.ws);
   return (
     <header className="mw-top">
       <Link href="/work" className="mw-logo">
         <i aria-hidden="true" />
         Engine <span className="faint" style={{ fontWeight: 500 }}>for experts</span>
       </Link>
-      <span className="mw-sandbox" title="A demo company on PayPal's test system. No real money moves.">PayPal sandbox · test money</span>
+      {me?.demoAccount && (
+        <span className="mw-demo" title="A sample expert account. Create your own to get real work.">
+          Demo account
+        </span>
+      )}
       <nav className="mw-nav" aria-label="Expert">
         <Link href="/work" aria-current={path === "/work" ? "page" : undefined}>
           My work
@@ -74,19 +89,41 @@ export function WorkBar() {
       <div className="mw-res">
         {me?.me ? (
           <>
-            <span className="mw-r mw-keep">
-              <small>Signed in as</small> <b>{me.me.name.split(" ")[0]}</b>
-            </span>
+            {companies.length > 1 ? (
+              <select
+                className="mw-company"
+                aria-label="Company you're working with"
+                value={me.ws}
+                onChange={async (e) => {
+                  await send("/api/work/me", { action: "company", ws: e.target.value });
+                  window.location.reload();
+                }}
+              >
+                {companies.map((c) => (
+                  <option key={c.ws} value={c.ws}>
+                    {c.name}
+                    {c.demo ? " (demo)" : ""}
+                    {c.invites ? ` · ${c.invites} invite${c.invites === 1 ? "" : "s"}` : ""}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              here && (
+                <span className="mw-r mw-hide-sm">
+                  <small>{here.demo ? "Demo company" : "Company"}</small> <b>{here.name}</b>
+                </span>
+              )
+            )}
             <button
               className="mw-switch"
               style={{ background: "transparent", font: "inherit", cursor: "pointer" }}
               onClick={async () => {
-                await send("/api/work/me", { action: "signout" });
+                await send("/api/auth", { action: "signout" });
                 // A full reload so every component re-reads who is signed in.
                 window.location.assign(new URL("/login", window.location.origin).toString());
               }}
             >
-              Sign out
+              {me.me.name.split(" ")[0]} · Sign out
             </button>
           </>
         ) : (
@@ -99,39 +136,26 @@ export function WorkBar() {
   );
 }
 
-export function SignIn({ data, onDone }: { data: Me; onDone: () => void }) {
+/** Shown on expert pages to someone who isn't signed in as an expert. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function SignIn(_: { data: Me; onDone: () => void }) {
   return (
-    <div style={{ maxWidth: 760 }}>
-      <p className="label">Engine for experts</p>
+    <div style={{ maxWidth: 640 }}>
       <h1 className="h1">
         Work that finds <em>you</em>
       </h1>
-      <p className="soft" style={{ marginBottom: 18 }}>
-        Founders post work; Engine&apos;s Matcher invites the experts whose profiles fit. Pick a profile to see the sandbox demo from their side.
+      <p className="soft" style={{ marginBottom: 32 }}>
+        Companies post work, and Engine&rsquo;s Matcher invites the experts whose profiles fit. You&rsquo;re paid through PayPal when the
+        work passes review.
       </p>
-      <div className="huts" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", marginTop: 0 }}>
-        {data.experts.map((e) => (
-          <button
-            key={e.id}
-            className="hut"
-            style={{ textAlign: "left", cursor: "pointer", font: "inherit", color: "inherit", padding: "14px 16px" }}
-            onClick={async () => {
-              await send("/api/work/me", { action: "signin", expertId: e.id });
-              onDone();
-            }}
-          >
-            <div className="t">
-              <span>{e.name}</span>
-              <span className={`dot ${e.available ? "ok" : "idle"}`} />
-            </div>
-            <div className="d">{e.headline}</div>
-          </button>
-        ))}
+      <div className="row" style={{ flexWrap: "wrap" }}>
+        <Link className="btn p" href="/login?new=1">
+          Create an expert profile
+        </Link>
+        <Link className="btn" href="/login">
+          Sign in or try a demo account
+        </Link>
       </div>
-      <p className="faint" style={{ marginTop: 14 }}>
-        Sandbox demo sign-in. Real accounts would sign in with their own login. Running the company instead?{" "}
-        <Link href="/app">Open the owner dashboard</Link>.
-      </p>
     </div>
   );
 }

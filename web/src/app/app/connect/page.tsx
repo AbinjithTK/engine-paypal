@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { read } from "@/lib/engine/db";
+import { ownerPage } from "@/lib/engine/http";
 import { handedTo } from "@/lib/engine/mcp";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,11 @@ export const dynamic = "force-dynamic";
  * The owner's view of experts' AI agents. Each expert connects with their own
  * key from their own dashboard, so no key is ever shown here.
  */
-export default function Connect() {
+export default async function Connect() {
+  return ownerPage(() => render());
+}
+
+function render() {
   const db = read();
   const rows = db.experts.map((e) => {
     const calls = db.access.filter((a) => a.actor === e.name);

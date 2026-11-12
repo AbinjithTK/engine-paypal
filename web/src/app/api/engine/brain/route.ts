@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { addFact, FIRST_QUESTION, interviewTurn, SECTIONS } from "@/lib/engine/brain";
 import { nextId, now, read, reset, write } from "@/lib/engine/db";
-import { body, denied, fail, isOwner } from "@/lib/engine/http";
+import { body, denied, fail, isOwner, scoped } from "@/lib/engine/http";
 import { resolveNotices } from "@/lib/engine/jobs";
 import { connectRepo } from "@/lib/engine/github";
 import { ingest, reindexAll, removeDoc } from "@/lib/engine/ingest";
@@ -12,7 +12,7 @@ import type { BrainSection, SearchMode } from "@/lib/engine/types";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export async function GET() {
+async function GET_() {
   const db = read();
   return NextResponse.json({
     company: db.company,
@@ -57,7 +57,7 @@ type Action =
   | { action: "search"; query: string }
   | { action: "elastic_status" };
 
-export async function POST(req: Request) {
+async function POST_(req: Request) {
   if (!isOwner(req)) return denied();
   const b = await body<Action>(req);
   // A fact with no words, or in a section that doesn't exist, would show up in briefs as noise.
@@ -276,3 +276,6 @@ export async function POST(req: Request) {
     return fail(e);
   }
 }
+
+export const GET = scoped(GET_);
+export const POST = scoped(POST_);

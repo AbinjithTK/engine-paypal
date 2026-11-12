@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 import { SECTIONS } from "@/lib/engine/brain";
 import { runBuilder, toolsFor } from "@/lib/engine/builders";
 import { now, read, write } from "@/lib/engine/db";
-import { body, denied, fail, isOwner } from "@/lib/engine/http";
+import { body, denied, fail, isOwner, scoped } from "@/lib/engine/http";
 import { release } from "@/lib/engine/jobs";
 import type { BuilderMode, BuilderResources } from "@/lib/engine/types";
 
 /** What a new builder can be given: the company's sections, documents, connectors and playbooks. Private ones are left out. */
-export async function GET(req: Request) {
+async function GET_(req: Request) {
   if (!isOwner(req)) return denied();
   const db = read();
   return NextResponse.json({
@@ -49,7 +49,7 @@ type Action =
 
 const BUILT_IN = new Set(["scoper", "reviewer", "bookkeeper", "librarian", "scout"]);
 
-export async function POST(req: Request) {
+async function POST_(req: Request) {
   if (!isOwner(req)) return denied();
   const b = await body<Action>(req);
   try {
@@ -162,3 +162,6 @@ export async function POST(req: Request) {
     return fail(e);
   }
 }
+
+export const GET = scoped(GET_);
+export const POST = scoped(POST_);

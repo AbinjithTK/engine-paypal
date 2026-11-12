@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { chunksById, factsById } from "./brain";
 import { searchBrain } from "./search";
-import { now, read, write } from "./db";
+import { currentWs, DEMO_WS, now, read, workspaceExists, write } from "./db";
 import * as jobs from "./jobs";
 import { dollars } from "./paypal";
 import { DEMO_DOER } from "./seed";
@@ -37,17 +37,26 @@ function signingSecret(): string | null {
   );
 }
 
-function sign(expertId: string, secret: string): string {
-  return createHmac("sha256", secret)
-    .update(`engine-expert:${expertId}`)
-    .digest("base64url")
-    .slice(0, 32);
+function sign(subject: string, secret: string): string {
+  return createHmac("sha256", secret).update(`engine-expert:${subject}`).digest("base64url").slice(0, 32);
 }
 
-export function tokenForExpert(expertId: string): string | null {
+/** A key names the expert and the company, so one expert has one key per company they work with. */
+export function tokenForExpert(expertId: string, ws = currentWs()): string | null {
   const secret = signingSecret();
   if (!secret) return null;
-  return `eng_${Buffer.from(expertId).toString("base64url")}_${sign(expertId, secret)}`;
+  const subject = ws === DEMO_WS ? expertId : `${ws}:${expertId}`;
+  return `eng_${Buffer.from(subject).toString("base64url")}_${sign(subject, secret)}`;
+}
+
+/** The company a key belongs to, so the MCP route can run in it. A bad key falls back to the demo company and is refused later. */
+export function wsForToken(token: string | null): string {
+  const m = token ? /^eng_([A-Za-z0-9_-]+)_[A-Za-z0-9_-]{32}$/.exec(token) : null;
+  if (!m) return DEMO_WS;
+  const subject = Buffer.from(m[1], "base64url").toString();
+  const i = subject.indexOf(":");
+  const ws = i > 0 ? subject.slice(0, i) : DEMO_WS;
+  return workspaceExists(ws) ? ws : DEMO_WS;
 }
 
 export function sessionFor(token: string | null): Session | null {
@@ -57,19 +66,21 @@ export function sessionFor(token: string | null): Session | null {
   const db = read();
   const m = /^eng_([A-Za-z0-9_-]+)_([A-Za-z0-9_-]{32})$/.exec(token);
   if (m) {
-    const id = Buffer.from(m[1], "base64url").toString();
-    const want = Buffer.from(sign(id, secret));
+    const subject = Buffer.from(m[1], "base64url").toString();
+    const want = Buffer.from(sign(subject, secret));
     const got = Buffer.from(m[2]);
     if (want.length !== got.length || !timingSafeEqual(want, got)) return null;
+    const i = subject.indexOf(":");
+    // The key must be for the company this request is running in.
+    if ((i > 0 ? subject.slice(0, i) : DEMO_WS) !== currentWs()) return null;
+    const id = i > 0 ? subject.slice(i + 1) : subject;
     const e = db.experts.find((x) => x.id === id);
     return e ? { id: e.id, name: e.name, email: e.email } : null;
   }
-  // Older setups handed out the shared secret as Priya's key. It still works for her.
-  if (token === secret) {
+  // Older setups handed out the shared secret as Priya's key, for the demo company only.
+  if (token === secret && currentWs() === DEMO_WS) {
     const e = db.experts.find((x) => x.id === DEMO_DOER.id);
-    return e
-      ? { id: e.id, name: e.name, email: e.email }
-      : { id: DEMO_DOER.id, name: DEMO_DOER.name, email: DEMO_DOER.email };
+    return e ? { id: e.id, name: e.name, email: e.email } : { id: DEMO_DOER.id, name: DEMO_DOER.name, email: DEMO_DOER.email };
   }
   return null;
 }

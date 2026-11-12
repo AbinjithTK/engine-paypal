@@ -4,7 +4,7 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 
 import { read, reset } from "@/lib/engine/db";
-import { body } from "@/lib/engine/http";
+import { body, scoped } from "@/lib/engine/http";
 import type { Db } from "@/lib/engine/types";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
  */
 const DIR = path.join(process.env.DATA_DIR || path.join(process.cwd(), ".data"), "stages");
 
-export async function POST(req: Request) {
+async function POST_(req: Request) {
   if (process.env.NODE_ENV === "production") return NextResponse.json({ error: "Not available." }, { status: 404 });
   const { action, name } = await body<{ action: "save" | "load"; name: string }>(req);
   if (!/^[a-z0-9-]{1,40}$/.test(name ?? "")) return NextResponse.json({ error: "Bad stage name." }, { status: 400 });
@@ -33,3 +33,5 @@ export async function POST(req: Request) {
   }
   return NextResponse.json({ error: "Unknown action." }, { status: 400 });
 }
+
+export const POST = scoped(POST_);
