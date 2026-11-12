@@ -67,7 +67,9 @@ export function WorkBar() {
         <Link href="/work/profile" aria-current={path.startsWith("/work/profile") ? "page" : undefined}>
           Profile
         </Link>
-        <Link href="/app/connect">Use your AI agent</Link>
+        <Link href="/work/agent" aria-current={path.startsWith("/work/agent") ? "page" : undefined}>
+          Your AI agent
+        </Link>
       </nav>
       <div className="mw-res">
         {me?.me ? (

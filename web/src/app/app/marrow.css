@@ -1181,3 +1181,22 @@
   background: var(--sand);
   color: var(--ink);
 }
+
+
+/* ─── experts directory ─── */
+.mw .experts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+}
+.mw .expert {
+  display: block;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.mw .expert:hover {
+  border-color: var(--line-strong);
+}
+.mw .expert:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}

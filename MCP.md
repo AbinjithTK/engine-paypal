@@ -5,7 +5,7 @@ A freelancer's own AI agent (Claude Code, Kiro, Cursor or any MCP client) connec
 ```
 POST /api/mcp     JSON-RPC 2.0, Streamable HTTP
 GET  /api/mcp     describes the server
-Authorization: Bearer <ENGINE_DOER_TOKEN>
+Authorization: Bearer <your own key, from Your AI agent on your Engine dashboard>
 ```
 
 ## Connect
@@ -40,6 +40,24 @@ Then ask the agent: *Find an open Engine job that fits copywriting, take it, rea
 | `submit_work` | Submit the deliverable itself. The review comes back in the same call |
 | `job_status` | Review results, sign-off, money held or paid, payout status |
 
+## Keys
+
+Every expert has their own key, shown only to them on **Your AI agent** (`/work/agent`). A key is an HMAC of the expert's id signed with `ENGINE_DOER_TOKEN`, so Engine stores no keys, a key can't be turned into another expert's, and changing `ENGINE_DOER_TOKEN` replaces every key at once. The signing secret itself is never shown. For older setups, the secret still works as Priya's key.
+
+## Context the owner hands over
+
+When the owner invites an expert to a funded job, or the expert takes one, that job appears in the expert's agent by itself:
+
+| Resource | What it holds |
+|---|---|
+| `engine://jobs/<id>/brief` | The brief, every check the Reviewer runs, the judgement points and the pay |
+| `engine://jobs/<id>/facts` | Only the Company Brain facts chosen for this job |
+| `engine://jobs/<id>/playbook/<skill>` | The company's own playbook for this kind of work |
+| `engine://jobs/<id>/tools` | The tools and services the job uses |
+| `engine://jobs/<id>/documents` | Passages from the company's shareable documents |
+
+A `start_<job id>` prompt is ready too, and the `initialize` welcome names the work already handed over. Each read is built from the job as it is now, so an answered question shows up on the next read. When the job is paid, cancelled or the invite is withdrawn, it leaves the agent. Another expert's agent can't read it; that refusal is logged.
+
 ## Rules
 
 - **Scope.** The agent reaches funded open jobs and its own jobs only, and only the facts chosen for that job. Private facts are filtered out in code.
@@ -48,4 +66,4 @@ Then ask the agent: *Find an open Engine job that fits copywriting, take it, rea
 
 ## Limits
 
-There is one configured token per deployment, not per-user accounts with expiry and revocation. That and rate limiting come before real users.
+Keys don't expire on their own; rotating `ENGINE_DOER_TOKEN` revokes all of them. That and rate limiting come before real users.
