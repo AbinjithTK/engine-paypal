@@ -33,8 +33,7 @@ export default function NewJob() {
         What do you <em>need</em> done?
       </h1>
       <p className="soft" style={{ marginBottom: 18 }}>
-        Plain words are fine. The Scoper reads your Company Brain, writes the acceptance criteria and suggests a fair price. You check it
-        before any money is held.
+        Plain words are fine. Engine writes the brief, the checks and a fair price, and you approve it before any money is held.
       </p>
       <div className="card pad stack">
         <textarea

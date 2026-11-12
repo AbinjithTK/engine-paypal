@@ -29,8 +29,7 @@ export default function Experts() {
         The people who <em>steer</em> the work
       </h1>
       <p className="soft" style={{ marginBottom: 22, maxWidth: 760 }}>
-        Each expert works with their own AI tools and sets the standard for their field. Open a profile to see what they&rsquo;ve done
-        and invite them to a job. The Matcher also suggests the best fits on each team board.
+        Each works with their own AI tools. Open a profile to see their work and hand them a job.
       </p>
       <div className="experts">
         {rows.map(({ e, done, active, invited }) => (

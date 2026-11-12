@@ -23,9 +23,7 @@ export default function Connect() {
         Experts work from their <em>own</em> AI agents
       </h1>
       <p className="soft" style={{ marginBottom: 22 }}>
-        Each expert connects Claude Code, Kiro or Cursor with their own key, from their own dashboard. When you invite someone or they
-        take a job, the brief, the facts it needs, its playbooks and its tools appear in their agent by themselves. You hand over work;
-        Engine hands over the context.
+        When you hand an expert a job, its brief, facts, playbooks and tools appear in their Claude Code, Kiro or Cursor by themselves.
       </p>
 
       <div className="card">

@@ -1200,3 +1200,143 @@
   outline: 2px solid var(--blue);
   outline-offset: 2px;
 }
+
+
+/* ─── calmer layout: more room, fewer words ─── */
+.mw-main {
+  padding-top: 40px;
+}
+.mw .h1 {
+  margin: 4px 0 10px;
+}
+.mw .h1 + .soft {
+  max-width: 640px;
+  line-height: 1.55;
+}
+.mw .card.pad {
+  padding: 20px 24px;
+}
+.mw .pad-lg {
+  padding: 28px 32px;
+}
+.mw .stack-lg {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.mw .page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.mw .page-head .h1 {
+  margin: 0 0 8px;
+}
+.mw .page-head > div {
+  min-width: 0;
+  flex: 1 1 360px;
+}
+.mw .page-head + * {
+  margin-bottom: 24px;
+}
+@media (max-width: 760px) {
+  .mw-main {
+    padding-top: 24px;
+  }
+  .mw .pad-lg {
+    padding: 20px;
+  }
+  .mw .page-head {
+    margin-bottom: 24px;
+  }
+}
+
+/* form fields with their label on top */
+.mw .field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mw .field > span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* toggle chips for picking resources */
+.mw .picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mw .pick {
+  font: 500 14px var(--sans);
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  min-height: 36px;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+.mw .pick:hover {
+  border-color: var(--line-strong);
+}
+.mw .pick[aria-pressed="true"] {
+  background: var(--blue-wash);
+  border-color: var(--blue);
+  color: var(--blue-deep);
+}
+.mw .pick:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* builder cards */
+.mw .builders {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
+  gap: 20px;
+}
+.mw .builder {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mw .builder-job {
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.mw .meta {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+.mw .meta > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+}
+.mw .meta dt {
+  color: var(--ink-faint);
+}
+.mw .meta dd {
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.mw .builder-foot {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}

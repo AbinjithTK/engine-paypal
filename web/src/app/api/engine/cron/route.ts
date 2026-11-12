@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const daily = new URL(req.url).searchParams.get("daily") === "1";
   const runs: Record<string, string> = {};
   if (daily) {
-    for (const id of ["bookkeeper", "librarian", "scout"]) {
+    for (const id of read().builders.filter((x) => !["scoper", "reviewer"].includes(x.id)).map((x) => x.id)) {
       const b = read().builders.find((x) => x.id === id);
       // Only builders the owner put on the schedule; AI ones cost credits per run.
       if (!b || b.paused || !b.scheduled) continue;

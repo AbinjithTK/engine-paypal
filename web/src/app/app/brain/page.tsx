@@ -107,8 +107,7 @@ function BrainPage() {
         Your Company <em>Brain</em>
       </h1>
       <p className="soft" style={{ marginBottom: 22, maxWidth: 760 }}>
-        Everything Engine knows about {b.company.name}, with where each fact came from. Each job gets only the facts it needs, and
-        anything under &ldquo;Never shared&rdquo; never leaves.
+        What Engine knows about {b.company.name}, and where each fact came from. Each job sees only what it needs.
       </p>
 
       <div className="seg" role="group" aria-label="Brain sections" style={{ marginBottom: 18 }}>

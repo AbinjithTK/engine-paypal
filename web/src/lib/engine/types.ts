@@ -298,6 +298,19 @@ export type Builder = {
   scheduled?: boolean;
   /** Each run calls an AI model, so it costs credits. */
   usesAi?: boolean;
+  /** Set for builders the owner made (or added from Scout): what it reads on each run. */
+  resources?: BuilderResources;
+};
+
+/** Exactly what a builder may read. Private facts and documents are never included. */
+export type BuilderResources = {
+  /** Brain sections it reads; empty means none. */
+  sections: string[];
+  docIds: string[];
+  connectorIds: string[];
+  skillIds: string[];
+  /** Reads recent PayPal sales through list_transactions. */
+  paypalSales: boolean;
 };
 
 export type AccessEntry = {

@@ -5,7 +5,7 @@ import { recentTransactions } from "./bookkeeper";
 import { now, read, write } from "./db";
 import { json } from "./gemini";
 import { notice } from "./jobs";
-import type { Builder } from "./types";
+import type { Builder, BuilderResources } from "./types";
 
 /**
  * Builders that run on a schedule or on demand. Each returns a one-line
@@ -181,6 +181,85 @@ async function runLibrarian(): Promise<string> {
   });
 }
 
+/** Builders that Engine runs on its own triggers, not on "Run now". */
+const EVENT_BUILDERS = new Set(["scoper", "reviewer"]);
+
+/** The tools a builder's resources amount to, for its card and its run log. */
+export function toolsFor(r: BuilderResources): string[] {
+  return [
+    ...(r.sections.length ? ["brain.read"] : []),
+    ...(r.docIds.length ? ["documents.read"] : []),
+    ...(r.skillIds.length ? ["playbooks.read"] : []),
+    ...(r.connectorIds.length ? ["connectors.read"] : []),
+    ...(r.paypalSales ? ["paypal.list_transactions"] : []),
+  ];
+}
+
+/**
+ * Any builder the owner made, or added from Scout. It reads exactly the
+ * resources it was given, and its only output is suggestions on Home.
+ * It has no tool that posts, funds, pays or sends anything.
+ */
+async function runCustom(b: Builder): Promise<string> {
+  const db = read();
+  const r: BuilderResources = b.resources ?? { sections: ["company", "customers", "offer", "voice", "avoid"], docIds: [], connectorIds: [], skillIds: [], paypalSales: false };
+  const facts = liveFacts(db)
+    .filter((f) => f.section !== "private" && r.sections.includes(f.section))
+    .map((f) => `(${f.section}) ${f.text}`);
+  const docs = db.docs.filter((d) => !d.private && r.docIds.includes(d.id));
+  const passages = db.chunks.filter((c) => !c.private && docs.some((d) => d.id === c.docId)).slice(0, 24);
+  const skills = db.skills.filter((s) => r.skillIds.includes(s.id));
+  const connectors = db.connectors.filter((c) => r.connectorIds.includes(c.id));
+  let tx: { amount: string; note: string; date: string }[] = [];
+  if (r.paypalSales) {
+    try {
+      tx = (await recentTransactions()).slice(0, 40);
+    } catch {
+      /* the run still goes ahead without sales */
+    }
+  }
+  const out = await json<{ summary: string; suggestions: { title: string; detail: string }[] }>({
+    system:
+      `You are ${b.name}, a builder for a small company. Your job: ${b.job}\n` +
+      "Work only from the material given. Return at most 3 suggestions the owner can act on, each specific and grounded in that material, " +
+      "with a number where the material has one. If nothing needs the owner, return none. You cannot post work, pay, or send anything; " +
+      "the owner decides. 'summary' is one plain sentence about what you found.",
+    prompt: [
+      `Company: ${db.company.name}`,
+      facts.length ? `\nCompany facts:\n${facts.join("\n")}` : "",
+      passages.length ? `\nFrom the documents:\n${passages.map((c) => `[${c.title}] ${c.text.slice(0, 700)}`).join("\n\n")}` : "",
+      skills.length ? `\nPlaybooks to follow:\n${skills.map((s) => `## ${s.name}\n${s.body}`).join("\n\n")}` : "",
+      connectors.length ? `\nTools the company uses:\n${connectors.map((c) => `- ${c.name}: ${c.purpose}`).join("\n")}` : "",
+      r.paypalSales ? `\nRecent PayPal transactions:\n${tx.map((t) => `${t.date} ${t.amount} ${t.note}`).join("\n") || "(none)"}` : "",
+    ].join("\n"),
+    schema: {
+      type: "object",
+      properties: {
+        summary: { type: "string" },
+        suggestions: { type: "array", items: { type: "object", properties: { title: { type: "string" }, detail: { type: "string" } }, required: ["title", "detail"] } },
+      },
+      required: ["summary", "suggestions"],
+    },
+  });
+  const ideas = (out.suggestions ?? []).slice(0, 3).filter((s) => s.title?.trim());
+  const summary = (out.summary || `${ideas.length} suggestion${ideas.length === 1 ? "" : "s"}`).trim().slice(0, 200);
+  await write((d) => {
+    for (const s of ideas) {
+      d.notices.unshift({
+        id: `note_${b.id}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+        kind: "suggestion",
+        title: s.title.trim().slice(0, 100),
+        why: s.detail.trim().slice(0, 600),
+        builder: b.name,
+        createdAt: now(),
+      });
+    }
+    const x = d.builders.find((y) => y.id === b.id);
+    if (x) logRun(x, summary, toolsFor(r));
+  });
+  return summary;
+}
+
 export async function runBuilder(id: string): Promise<string> {
   const b = read().builders.find((x) => x.id === id);
   if (!b) throw new Error("No such builder.");
@@ -189,7 +268,8 @@ export async function runBuilder(id: string): Promise<string> {
     if (id === "scout") return await runScout();
     if (id === "bookkeeper") return await runBookkeeper();
     if (id === "librarian") return await runLibrarian();
-    return `${b.name} runs when its trigger happens (${b.schedule.toLowerCase()}).`;
+    if (EVENT_BUILDERS.has(id)) return `${b.name} runs when its trigger happens (${b.schedule.toLowerCase()}).`;
+    return await runCustom(b);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     await write((d) => {

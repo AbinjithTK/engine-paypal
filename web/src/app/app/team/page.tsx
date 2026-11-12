@@ -28,7 +28,7 @@ export default function Teams() {
         Who is on <em>each</em> piece of work
       </h1>
       <p className="soft" style={{ marginBottom: 20, maxWidth: 720 }}>
-        Every project gets a team: one expert per role, matched from their profiles. Open a project to build or change its team.
+        One expert per role, matched from their profiles. Open a project to change its team.
       </p>
       {groups.length === 0 ? (
         <div className="card pad soft">
