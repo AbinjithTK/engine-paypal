@@ -69,8 +69,8 @@ export default function Landing() {
           <a href="#agents">Agents</a>
         </nav>
         <div className="mw-res">
-          <Link className="btn p s" href="/app">
-            Open the app
+          <Link className="btn p s" href="/login">
+            Sign in
           </Link>
         </div>
       </header>
@@ -87,10 +87,10 @@ export default function Landing() {
           </p>
           <div className="row" style={{ flexWrap: "wrap" }}>
             <Link className="btn p" href="/app">
-              Try it in the sandbox
+              I&rsquo;m hiring: open the owner dashboard
             </Link>
-            <Link className="btn" href="/app/connect">
-              Connect an AI agent
+            <Link className="btn" href="/login">
+              I&rsquo;m an expert: find my work
             </Link>
           </div>
         </section>

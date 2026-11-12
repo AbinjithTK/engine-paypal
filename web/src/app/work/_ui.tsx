@@ -70,22 +70,27 @@ export function WorkBar() {
         <Link href="/app/connect">Use your AI agent</Link>
       </nav>
       <div className="mw-res">
-        {me?.me && (
+        {me?.me ? (
           <>
-            <span className="mw-r">
-              <small>Signed in as</small> <b>{me.me.name}</b>
+            <span className="mw-r mw-keep">
+              <small>Signed in as</small> <b>{me.me.name.split(" ")[0]}</b>
             </span>
             <button
-              className="btn ghost s"
+              className="mw-switch"
+              style={{ background: "transparent", font: "inherit", cursor: "pointer" }}
               onClick={async () => {
                 await send("/api/work/me", { action: "signout" });
                 // A full reload so every component re-reads who is signed in.
-                window.location.assign(new URL("/work", window.location.origin).toString());
+                window.location.assign(new URL("/login", window.location.origin).toString());
               }}
             >
-              Switch
+              Sign out
             </button>
           </>
+        ) : (
+          <Link className="mw-switch" href="/login">
+            Sign in
+          </Link>
         )}
       </div>
     </header>
@@ -122,7 +127,8 @@ export function SignIn({ data, onDone }: { data: Me; onDone: () => void }) {
         ))}
       </div>
       <p className="faint" style={{ marginTop: 14 }}>
-        Sandbox demo sign-in. Real accounts would sign in with their own login.
+        Sandbox demo sign-in. Real accounts would sign in with their own login. Running the company instead?{" "}
+        <Link href="/app">Open the owner dashboard</Link>.
       </p>
     </div>
   );

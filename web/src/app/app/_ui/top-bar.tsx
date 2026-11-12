@@ -43,9 +43,12 @@ export function TopBar() {
         <span className="mw-r" title="Client money held in PayPal until work passes review">
           <small>Held</small> <b>{usd(state?.heldCents ?? 0)}</b>
         </span>
-        <span className="mw-r">
+        <span className="mw-r mw-hide-sm">
           <small>Builders</small> <b>{busy ? `${busy} busy` : state ? `${state.builders.length}` : "-"}</b>
         </span>
+        <Link className="mw-switch" href="/login" title="Sign in as an expert, or as the owner">
+          {state ? `${state.company.owner} · Switch` : "Switch"}
+        </Link>
       </div>
     </header>
   );
