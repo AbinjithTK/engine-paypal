@@ -1,5 +1,7 @@
 import "server-only";
 
+import { read } from "./db";
+
 /**
  * PayPal REST, called directly for everything that moves money.
  *
@@ -85,6 +87,16 @@ async function call<T>(
   return json as T;
 }
 
+/**
+ * The key PayPal sees for one job's money. Job ids restart at 1 in every
+ * company, so the store's random instance id is part of it: without it, two
+ * companies' job_0001 would share request ids, invoice ids and payout batch ids.
+ */
+function key(jobId: string): string {
+  const inst = read().instance;
+  return inst ? `${inst}-${jobId}` : jobId;
+}
+
 export function dollars(cents: number): string {
   if (!Number.isInteger(cents) || cents < 0) throw new Error(`Bad amount ${cents}`);
   return `${Math.trunc(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
@@ -127,7 +139,7 @@ export async function createHold(opts: {
         },
       },
     },
-    `${opts.jobId}-order`,
+    `${key(opts.jobId)}-order`,
   );
   const approve = o.links.find((l) => l.rel === "payer-action" || l.rel === "approve");
   if (!approve) throw new PayPalError("PayPal returned no approval link.", 500, "NO_APPROVE_LINK");
@@ -143,7 +155,7 @@ export async function authorizeHold(
     purchase_units: {
       payments?: { authorizations?: { id: string; expiration_time?: string; amount: { value: string } }[] };
     }[];
-  }>("POST", `/v2/checkout/orders/${orderId}/authorize`, {}, `${jobId}-authorize`);
+  }>("POST", `/v2/checkout/orders/${orderId}/authorize`, {}, `${key(jobId)}-authorize`);
   const a = r.purchase_units?.[0]?.payments?.authorizations?.[0];
   if (!a) throw new PayPalError("PayPal returned no authorization.", 500, "NO_AUTHORIZATION");
   return { authorizationId: a.id, expires: a.expiration_time, amount: a.amount.value };
@@ -193,7 +205,7 @@ export async function createHoldWithTestCard(opts: {
         },
       },
     },
-    `${opts.jobId}-order-card`,
+    `${key(opts.jobId)}-order-card`,
   );
   const a = o.purchase_units?.[0]?.payments?.authorizations?.[0];
   if (!a || a.status !== "CREATED") throw new PayPalError(`Card hold not placed (${o.status}).`, 402, "CARD_DECLINED");
@@ -218,20 +230,20 @@ export async function captureHold(
     {
       amount: { currency_code: "USD", value: dollars(totalCents) },
       final_capture: true,
-      invoice_id: jobId,
+      invoice_id: key(jobId),
       note_to_payer: "Released by Engine after the work passed review.",
     },
-    `${jobId}-capture`,
+    `${key(jobId)}-capture`,
   );
   return { captureId: r.id, status: r.status };
 }
 
 export async function voidHold(jobId: string, authorizationId: string) {
-  await call("POST", `/v2/payments/authorizations/${authorizationId}/void`, {}, `${jobId}-void`);
+  await call("POST", `/v2/payments/authorizations/${authorizationId}/void`, {}, `${key(jobId)}-void`);
 }
 
 /**
- * Pay the people who did the work. sender_batch_id is the job id, and PayPal
+ * Pay the people who did the work. sender_batch_id comes from the job, and PayPal
  * refuses a second batch with the same id within 30 days, so a retry, a
  * double click or a replayed request cannot pay twice.
  */
@@ -245,7 +257,7 @@ export async function payout(
     "/v1/payments/payouts",
     {
       sender_batch_header: {
-        sender_batch_id: `engine-${jobId}`,
+        sender_batch_id: `engine-${key(jobId)}`,
         email_subject: "You've been paid through Engine",
         email_message: `Your work on "${title.slice(0, 80)}" passed review.`,
       },

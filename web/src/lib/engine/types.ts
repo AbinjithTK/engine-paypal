@@ -336,6 +336,12 @@ export type Company = {
 export type Interview = { role: "engine" | "founder"; text: string; at: string }[];
 
 export type Db = {
+  /**
+   * Random per store, set on first load. Job ids restart at 1 in every
+   * company (and in the demo after each restart), so PayPal request keys
+   * combine this with the job id to stay unique.
+   */
+  instance?: string;
   version: 1;
   company: Company;
   facts: Fact[];

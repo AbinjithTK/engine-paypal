@@ -1,6 +1,7 @@
 import "server-only";
 
 import { AsyncLocalStorage } from "node:async_hooks";
+import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -109,6 +110,7 @@ function load(ws = currentWs()): Db {
       g.__engineDbs[ws] = (ws === DEMO_WS ? demoStart() : null) ?? fresh();
     }
   }
+  g.__engineDbs[ws].instance ??= randomBytes(5).toString("hex");
   return withExperts(g.__engineDbs[ws]);
 }
 
