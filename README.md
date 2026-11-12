@@ -74,16 +74,19 @@ Passages are always kept locally. Switching to Elastic copies them into the inde
 
 | Screen | What it does |
 |---|---|
-| `/app` Village | The company as buildings, the AI builders at work, and the cards that need you |
+| `/login` | Sign in as the business owner or as one of the experts (sandbox demo sign-in) |
+| `/app` Home | The company at a glance, the AI builders at work, the cards that need you, and one suggestion at a time |
 | `/app/jobs` | Work, milestones, the money held and paid |
 | `/app/jobs/[id]` | Brief, AI checks with reasons, notes for the person signing off, sign-off, PayPal IDs, what the job can see, agent access log |
 | `/app/brain` | Facts: interview, confirm, resolve conflicts, answer freelancers' questions. Documents: uploads, GitHub, pasted notes. Connectors and skills. Search: local or Elastic, and a test box |
 | `/app/builders` | Scoper, Reviewer, Bookkeeper, Librarian, Scout: run history, how much each does on its own, pause |
 | `/app/team`, `/app/team/[id]` | Teams per project, and the visual team builder: role slots, AI-ranked experts with reasons, drag to invite |
-| `/app/connect` | How a freelancer's agent connects over MCP |
+| `/app/experts`, `/app/experts/[id]` | Browse experts and their profiles, see their work with you, hand them a job |
+| `/app/connect` | Which experts' agents are connected, and what each one has been handed |
 | `/work` | The expert's dashboard: invites with why they fit, jobs, earnings, open jobs |
 | `/work/jobs/[id]` | The full brief, checks and judgement calls, the company's playbooks and passages, Q&A with the founder, the team, submit and review |
 | `/work/profile` | The profile the Matcher reads |
+| `/work/agent` | The expert's own MCP key, setup for Claude Code, Kiro or Cursor, and what their agent sees right now |
 
 ## Run it locally
 
@@ -120,7 +123,7 @@ claude mcp add --transport http engine http://127.0.0.1:3000/api/mcp \
 | `ELASTIC_INDEX`, `ELASTIC_INFERENCE_ID` | no | Index name (default `engine-brain`) and a non-default inference endpoint for `semantic_text` |
 | `GITHUB_TOKEN` | no | Read-only token for connecting private repos |
 | `ENGINE_DOER_TOKEN` | prod | Bearer token for the freelancer's agent |
-| `ENGINE_SHOW_DOER_TOKEN` | no | `1` shows the token on `/app/connect` (public demo only) |
+| `ENGINE_SHOW_DOER_TOKEN` | no | Kept for older setups; each expert now sees only their own key on `/work/agent` |
 | `ENGINE_OWNER_KEY` | no | Locks owner actions behind `/app/unlock`. Unset means an open demo |
 | `CRON_SECRET` | prod | Protects `/api/engine/cron` |
 | `DATA_DIR` | prod | Where the JSON store lives. Default `web/.data` |
@@ -142,7 +145,7 @@ Next.js 16, React 19, TypeScript. PayPal REST APIs and `@paypal/agent-toolkit`. 
 
 - **Sandbox only.** Live payouts need PayPal's approval, and Engine's terms need a lawyer's review before real clients use it.
 - **One company per deployment.** Data is a single JSON file on disk. Postgres is the next step.
-- **Demo identities.** The expert dashboard signs in by picking a seeded profile, and the MCP token belongs to one expert. Real accounts, expert vetting and credential checks, such as bar registration, are not built.
+- **Demo identities.** The expert dashboard signs in by picking a seeded profile, and each expert's MCP key is signed from `ENGINE_DOER_TOKEN`, with no expiry beyond rotating that secret. Real accounts, expert vetting and credential checks, such as bar registration, are not built.
 - **Payouts to seeded experts.** Only experts with sandbox PayPal accounts (`PAYPAL_FREELANCER_EMAIL`, `PAYPAL_EXPERT_EMAILS`) receive payouts you can see. The others' payouts stay unclaimed in the sandbox.
 - **The AI review can be wrong,** which is why money waits for a person on anything that needs judgement, and why appeals exist.
 - Engine is a marketplace. It does not give legal, tax or financial advice.
