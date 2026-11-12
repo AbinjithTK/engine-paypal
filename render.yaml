@@ -24,6 +24,9 @@ services:
         value: /tmp/engine-data
       - key: PAYPAL_ENVIRONMENT
         value: SANDBOX
+      # A fresh start loads the sandbox demo company instead of an empty one.
+      - key: ENGINE_DEMO_START
+        value: "1"
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET

@@ -66,9 +66,24 @@ function load(): Db {
     const raw = fs.readFileSync(FILE, "utf8");
     g.__engineDb = upgrade(JSON.parse(raw) as Db);
   } catch {
-    g.__engineDb = fresh();
+    g.__engineDb = demoStart() ?? fresh();
   }
   return g.__engineDb;
+}
+
+/**
+ * With ENGINE_DEMO_START=1, an empty store starts as the sandbox demo company
+ * (Northwind Coffee after one real paid PayPal sandbox run), so a visitor
+ * never lands on an empty app after a restart. It holds no keys.
+ */
+function demoStart(): Db | null {
+  if (process.env.ENGINE_DEMO_START !== "1") return null;
+  try {
+    const raw = fs.readFileSync(path.join(process.cwd(), "demo-seed", "start.json"), "utf8");
+    return upgrade(JSON.parse(raw) as Db);
+  } catch {
+    return null;
+  }
 }
 
 function save(db: Db) {

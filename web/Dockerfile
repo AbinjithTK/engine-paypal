@@ -25,5 +25,7 @@ ENV HOSTNAME=0.0.0.0
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
+# The sandbox demo company a fresh start loads (ENGINE_DEMO_START=1).
+COPY --from=build /app/demo-seed ./demo-seed
 EXPOSE 8080
 CMD ["node", "server.js"]
