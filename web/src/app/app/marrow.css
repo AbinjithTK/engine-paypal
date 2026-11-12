@@ -1010,7 +1010,9 @@
   }
   .mw .assist-acts {
     flex: 1 0 100%;
+    flex-wrap: wrap;
     padding-left: 52px;
+    min-width: 0;
   }
   .mw .assist-x {
     margin-left: auto;
